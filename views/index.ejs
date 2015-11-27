@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NGO Agastya</title>
+    <style>
+      
+      #right-panel {
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+
+      #right-panel {
+        margin: 20px;
+        border-width: 2px;
+        width: 20%;
+        float: left;
+        text-align: left;
+        padding-top: 20px;
+      }
+      #directions-panel {
+        margin-top: 20px;
+        background-color: #FFEE77;
+        padding: 10px;
+      }
+    </style>
+
+    <meta name="description" content="An example demonstrating Google Map integration with MEAN Apps">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/stylesheets/mycustom.css"/>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBm7zyK2ATNkjc__8Bad_sjbKjMJuaqKEk"></script>
+    <!-- JS Source -->
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.js"></script>
+
+    <script src="../bower_components/angular-route/angular-route.js"></script>
+    <script src="../bower_components/angular-geolocation/angularjs-geolocation.js"></script>
+    <script src="/libs/convex_hull.js"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/javascripts/app.js"></script>
+    <script src="/javascripts/map.js"></script>
+    <script src="/javascripts/school.js"></script>
+    <script src="/javascripts/markerclusterer.js"></script>
+
+</head>
+<body ng-app="NGOAgastya" ng-controller="MainCtrl">
+
+<div class="container-fluid">
+    
+    <div class="header giveItSomeMargin" >
+        <ul class="nav nav-pills pull-right">
+            <li ng-class="{ active:isSelected(1)}"><a href ng-click="selectTab(1)">Add School</a></li>
+            <li ng-class="{ active:isSelected(2)}"><a href ng-click="selectTab(2)">Find Routes</a></li>
+        </ul>
+        <h3 class="text brandName">Agastya International Foundation</h3>
+    </div>
+
+
+    <!-- Map and Side Panel -->
+    <div class="row content" ng-controller="MapController as map">
+        
+
+        <!-- Google Map -->
+        <div class="col-md-9">
+            <div id="googleMap" style="width:100%;height:765px;">
+            </div>
+           <!--  <div><button type="submit" class="btn btn-danger btn-block" ng-click="map.loadMap1()">Load</button></div> -->
+            <!-- <div><button type="submit" class="btn btn-danger btn-block">Load</button></div> -->      
+        </div>
+        
+
+
+        <!-- Side Panel -->
+        <div class="col-md-3"> <!-- ng-controller="AddController as ctrl" -->
+            <div class="panel panel-default" ng-show="isSelected(1)">
+                <!-- Panel Title -->
+                <div class="panel-heading">
+                    <h2 class="panel-title text-center">Add School! <span class="glyphicon glyphicon-map-marker"></span></h2>
+                </div>
+                <!-- Panel Body -->
+                <div class="panel-body">
+                    <!-- Creates Form (novalidate disables HTML validation, Angular will control) -->
+                    <form name ="addForm" novalidate>
+                        <!-- Text Boxes and Other User Inputs. Note ng-model binds the values to Angular $scope -->
+                        <div class="form-group">
+                            <label for="School Name">School Name <span class="badge">All fields required</span></label>
+                            <input type="text" class="form-control" id="username" placeholder="Enter school name" ng-model="map.formData.school" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Prinipal Name</label>
+                            <input type="text" class="form-control" id="age" placeholder="Enter the prinipal name" ng-model="map.formData.principal" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="language">Contact</label>
+                            <input type="text" class="form-control" id="language" placeholder="Enter mobile number" ng-model="map.formData.contact" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="latitude">Latitude</label>
+                            <input type="text" class="form-control" id="latitude"  placeholder="Latitude" ng-model="map.formData.latitude" >
+                        </div>
+                        <div class="form-group">
+                            <label for="longitude">Longitude</label>
+                            <input type="text" class="form-control" id="longitude" placeholder="Longitude" ng-model="map.formData.longitude">
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h2 class="panel-title text-center">Add Class<span class="glyphicon glyphicon-map-marker"></span></h2>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="longitude">Class</label>
+                                    <input type="text" placeholder="Enter class" class="form-control" ng-model="map.grade">
+                                    <label for="longitude">Strength</label>
+                                    <input type="text" class="form-control" placeholder="Enter strength"
+                                    ng-model="map.strength">
+                                    <button type="submit" class="btn pull-center btn-info" id="addClass" ng-click="map.addMoreClass($event)" style="margin-top:3px;">Add Class</button>
+                                </div>
+                            </div>
+                        </div>
+
+                <!-- Error block -->
+            <div class="alert alert-info" ng-show="map.isShown">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close" ng-click="map.isShown=false">&times;</a>
+                <strong>{{map.Info}}</strong>
+            </div>
+            <!-- Error block -->
+
+            <button type="submit" class="btn btn-info btn-block" ng-click="map.addSchool()">Add School</button>
+            </form>
+          </div>
+        </div>
+            
+           <!--  panel II -->
+            <div class="panel panel-default" ng-show="isSelected(2)">
+                  <div class="panel-heading">
+                    <h2 class="panel-title text-center">Find Routes <span class="glyphicon glyphicon-map-marker"></span></h2>
+                </div>
+                <div class="panel-body">
+                        <button class="btn btn-primary btn-block" ng-click="createPaths()" ng-show="clustervisible">Generate Clusters</button>
+                        <a href="#" class="btn btn-info btn-lg pull-left" ng-click="getPrevPath()" ng-show="Navvisible">
+                          <span class="glyphicon glyphicon-arrow-left"></span> PrevCluster
+                        </a>
+
+                        <a href="#" class="btn btn-info btn-lg pull-right" ng-click="getNextPath()" ng-show="Navvisible">
+                          <span class="glyphicon glyphicon-arrow-right"></span> NextCluster
+                        </a>
+
+                        <br><br><br>
+                        <p class="text-center">See your routes here</p>
+                        <div id = "directions-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <!-- Footer -->
+   <!--  <div class="footer">
+        <p class="text-center"><span class="glyphicon glyphicon-check"></span> Created by Deepak
+           </p>
+    </div> -->
+</div>
+
+</body>
+</html>
